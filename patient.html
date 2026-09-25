@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جرعة عافية | بيانات المريض</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Cairo",sans-serif;background:linear-gradient(135deg,#f0f9ff,#fff 55%,#ecfeff);color:#0f172a;min-height:100vh}
+.topbar{background:linear-gradient(135deg,#075985,#0e7490);color:#fff;padding:18px 20px;box-shadow:0 8px 25px #07598522}
+.topbar-inner{max-width:1000px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:48px;height:48px;border-radius:15px;background:#ffffff29;display:grid;place-items:center;font-size:25px}
+.brand h1{font-size:23px;font-weight:800}.brand span{display:block;font-size:12px;opacity:.88}.security{font-size:12px;background:#ffffff1f;padding:8px 12px;border-radius:999px}
+.container{max-width:1000px;margin:35px auto;padding:0 18px 40px}
+.loading,.error{max-width:650px;margin:70px auto;text-align:center;background:#fffffff2;border-radius:24px;padding:40px 25px;box-shadow:0 15px 50px #0f172a14}
+.loader{width:48px;height:48px;border:5px solid #e0f2fe;border-top-color:#0284c7;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}} .error-icon{font-size:55px;margin-bottom:15px}.error h2{color:#b91c1c;margin-bottom:10px}.error p{color:#64748b;line-height:1.9}
+.profile{display:none}.hero-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#075985,#0891b2);color:#fff;border-radius:28px;padding:30px;box-shadow:0 20px 55px #07598533;margin-bottom:20px}
+.status{display:inline-flex;align-items:center;gap:7px;background:#ffffff26;border:1px solid #ffffff2e;padding:7px 13px;border-radius:999px;font-size:12px;margin-bottom:15px}.status-dot{width:8px;height:8px;border-radius:50%;background:#86efac}
+.hero-card h2{font-size:clamp(25px,5vw,38px);margin-bottom:7px}.hero-card p{opacity:.9;line-height:1.8}.patient-id{margin-top:18px;font-size:12px;opacity:.8;direction:ltr;text-align:right}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{background:#fffffff0;border:1px solid #e2e8f0;border-radius:22px;padding:22px;box-shadow:0 12px 35px #0f172a0f}.card.full{grid-column:1/-1}
+.card-title{display:flex;align-items:center;gap:10px;color:#075985;font-size:17px;font-weight:800;margin-bottom:17px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}.icon{width:36px;height:36px;display:grid;place-items:center;background:#e0f2fe;border-radius:11px;font-size:18px}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.info{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:13px}.label{display:block;color:#64748b;font-size:12px;margin-bottom:5px}.value{color:#0f172a;font-weight:700;line-height:1.7;word-break:break-word}
+.blood{display:inline-flex;align-items:center;justify-content:center;min-width:65px;padding:7px 12px;background:#fee2e2;color:#b91c1c;border-radius:10px;font-weight:800;direction:ltr}.text-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:15px;line-height:2;white-space:pre-wrap;word-break:break-word}
+.danger{border-color:#fecaca;background:#fff7f7}.danger .card-title{color:#b91c1c}.footer{text-align:center;color:#64748b;font-size:12px;line-height:1.8;margin-top:25px}.footer strong{color:#075985}
+.retry{margin-top:20px;border:0;background:#075985;color:#fff;padding:11px 20px;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:700}
+@media(max-width:700px){.topbar-inner{align-items:flex-start;flex-direction:column}.security{align-self:flex-start}.grid,.info-grid{grid-template-columns:1fr}.card.full{grid-column:auto}.hero-card{padding:24px 20px;border-radius:22px}.container{margin-top:22px}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner"><div class="brand"><div class="brand-icon">❤️</div><div><h1>جرعة عافية</h1><span>رعاية ومعلومات المرضى</span></div></div><div class="security">بيانات تم فتحها بواسطة QR</div></div></header>
+<main class="container">
+<section class="loading" id="loading"><div class="loader"></div><h2>جاري قراءة بيانات المريض</h2><p>يرجى الانتظار لحظات...</p></section>
+<section class="error" id="error" style="display:none"><div class="error-icon">⚠️</div><h2>لم يتم العثور على بيانات المريض</h2><p id="errorMessage">الرابط لا يحتوي على بيانات مريض صالحة.</p><button class="retry" onclick="location.reload()">إعادة المحاولة</button></section>
+<section class="profile" id="profile">
+<div class="hero-card"><div class="status"><span class="status-dot"></span>ملف مريض صالح</div><h2 id="patientName">—</h2><p>صفحة البيانات الطبية الأساسية للمريض عبر منصة <strong>جرعة عافية</strong></p><div class="patient-id">معرف الملف: <span id="patientId">—</span></div></div>
+<div class="grid">
+<div class="card"><div class="card-title"><div class="icon">👤</div>البيانات الشخصية</div><div class="info-grid">
+<div class="info"><span class="label">اسم المريض</span><div class="value" id="nameValue">—</div></div>
+<div class="info"><span class="label">العمر</span><div class="value" id="ageValue">—</div></div>
+<div class="info"><span class="label">الرقم القومي</span><div class="value" id="nationalIdValue">—</div></div>
+<div class="info"><span class="label">العنوان</span><div class="value" id="addressValue">—</div></div>
+</div></div>
+<div class="card"><div class="card-title"><div class="icon">📞</div>بيانات التواصل</div><div class="info-grid">
+<div class="info"><span class="label">هاتف أحد الأقارب</span><div class="value" id="relativePhoneValue">—</div></div>
+<div class="info"><span class="label">هاتف الطبيب</span><div class="value" id="doctorPhoneValue">—</div></div>
+</div></div>
+<div class="card"><div class="card-title"><div class="icon">🩸</div>المعلومات الطبية الأساسية</div><div class="info-grid">
+<div class="info"><span class="label">فصيلة الدم</span><div class="value"><span class="blood" id="bloodTypeValue">—</span></div></div>
+<div class="info"><span class="label">التشخيص</span><div class="value" id="diagnosisValue">—</div></div>
+<div class="info"><span class="label">الحساسية</span><div class="value" id="allergyValue">—</div></div>
+<div class="info"><span class="label">سيولة الدم</span><div class="value" id="bloodThinningValue">—</div></div>
+</div></div>
+<div class="card"><div class="card-title"><div class="icon">💊</div>الأدوية والأجهزة</div><div class="info-grid">
+<div class="info"><span class="label">الأدوية</span><div class="value" id="medicationsValue">—</div></div>
+<div class="info"><span class="label">الأجهزة الطبية</span><div class="value" id="medicalDevicesValue">—</div></div>
+<div class="info"><span class="label">منظم ضربات القلب</span><div class="value" id="pacemakerValue">—</div></div>
+</div></div>
+<div class="card danger full"><div class="card-title"><div class="icon">🚨</div>المخاطر الطبية وإجراءات التعامل</div><div class="info-grid">
+<div class="info"><span class="label">المخاطر الطبية</span><div class="value" id="medicalRisksValue">—</div></div>
+<div class="info"><span class="label">إدارة المخاطر</span><div class="value" id="riskManagementValue">—</div></div>
+</div></div>
+<div class="card full"><div class="card-title"><div class="icon">📝</div>الملاحظات الطبية</div><div class="text-box" id="medicalNotesValue">—</div></div>
+</div>
+<div class="footer"><strong>جرعة عافية</strong><br>مشروع مقدم من طلاب كلية التمريض - جامعة الفيوم<br>تحت إشراف الدكتور أحمد حسين أحمد قطب، مدرس إدارة التمريض<br><span>هذه الصفحة للعرض التجريبي ضمن مشروع Frontend.</span></div>
+</section>
+</main>
+<script>
+function clean(v){return v===null||v===undefined||v===""?"غير مسجل":String(v)}
+function setValue(id,v){document.getElementById(id).textContent=clean(v)}
+function showError(msg){document.getElementById("loading").style.display="none";document.getElementById("profile").style.display="none";document.getElementById("error").style.display="block";document.getElementById("errorMessage").textContent=msg}
+function decodePatient(){
+ const params=new URLSearchParams(window.location.search);
+ const data=params.get("data");
+ if(!data){showError("لم يتم إرسال بيانات المريض داخل الرابط.");return}
+ try{
+  const patient=JSON.parse(decodeURIComponent(data));
+  if(!patient||typeof patient!=="object")throw new Error("Invalid data");
+  displayPatient(patient);
+ }catch(e){console.error(e);showError("تعذر قراءة بيانات المريض. تأكد أن رمز QR تم إنشاؤه من النسخة الصحيحة من موقع جرعة عافية.")}
+}
+function displayPatient(p){
+ setValue("patientName",p.name);setValue("patientId",p.id);
+ setValue("nameValue",p.name);setValue("ageValue",p.age);setValue("nationalIdValue",p.nationalId);setValue("addressValue",p.address);
+ setValue("relativePhoneValue",p.relativePhone);setValue("doctorPhoneValue",p.doctorPhone);
+ setValue("bloodTypeValue",p.bloodType);setValue("diagnosisValue",p.diagnosis);setValue("allergyValue",p.allergy);setValue("bloodThinningValue",p.bloodThinning);
+ setValue("medicationsValue",p.medications);setValue("medicalDevicesValue",p.medicalDevices);setValue("pacemakerValue",p.pacemaker);
+ setValue("medicalRisksValue",p.medicalRisks);setValue("riskManagementValue",p.riskManagement);setValue("medicalNotesValue",p.medicalNotes);
+ document.getElementById("loading").style.display="none";document.getElementById("profile").style.display="block";
+}
+decodePatient();
+</script>
+</body>
+</html>
