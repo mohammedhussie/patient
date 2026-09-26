@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جرعة عافية | بيانات المريض</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:"Cairo",sans-serif;
+    background:#f1f8fb;
+    color:#17324d;
+}
+.container{
+    width:min(900px,92%);
+    margin:30px auto;
+}
+.header{
+    background:linear-gradient(135deg,#075985,#0e7490);
+    color:white;
+    padding:28px 22px;
+    border-radius:22px;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(7,89,133,.18);
+}
+.logo{
+    width:72px;
+    height:72px;
+    margin:0 auto 12px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#075985;
+    font-size:34px;
+    font-weight:800;
+}
+.header h1{margin:0;font-size:28px}
+.header p{margin:6px 0 0;opacity:.9}
+
+.card{
+    background:white;
+    margin-top:20px;
+    padding:22px;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,.07);
+}
+.card h2{
+    margin-top:0;
+    color:#075985;
+    font-size:20px;
+    border-bottom:2px solid #e5f1f6;
+    padding-bottom:10px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+.item{
+    background:#f8fbfc;
+    border:1px solid #e3eef2;
+    border-radius:14px;
+    padding:13px;
+}
+.label{
+    color:#64748b;
+    font-size:13px;
+    margin-bottom:4px;
+}
+.value{
+    font-weight:700;
+    color:#17324d;
+    word-break:break-word;
+}
+.full{grid-column:1/-1}
+
+.alert{
+    text-align:center;
+    background:#fff7ed;
+    color:#9a3412;
+    border:1px solid #fed7aa;
+    padding:18px;
+    border-radius:16px;
+    margin-top:20px;
+}
+.loading{
+    text-align:center;
+    padding:35px 10px;
+    color:#075985;
+}
+.footer{
+    text-align:center;
+    color:#64748b;
+    font-size:13px;
+    padding:25px 10px 35px;
+}
+.badge{
+    display:inline-block;
+    background:#e0f2fe;
+    color:#075985;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+@media(max-width:650px){
+    .container{width:94%;margin:15px auto}
+    .grid{grid-template-columns:1fr}
+    .full{grid-column:auto}
+    .header h1{font-size:23px}
+    .card{padding:16px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="logo">ع</div>
+        <h1>جرعة عافية</h1>
+        <p>بطاقة بيانات المريض</p>
+    </div>
+
+    <div id="content">
+        <div class="loading">جاري تحميل بيانات المريض...</div>
+    </div>
+
+    <div class="footer">
+        مشروع طلاب كلية التمريض - جامعة الفيوم
+        <br>
+        نظام مساعد للتعرف على بيانات المريض عند الحاجة
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+
+<script>
+function getPatientData() {
+
+    const params = new URLSearchParams(window.location.search);
+    const compressedData = params.get("data");
+
+    if (!compressedData) {
+        return null;
+    }
+
+    try {
+        const json = LZString.decompressFromEncodedURIComponent(compressedData);
+
+        if (!json) {
+            throw new Error("تعذر فك البيانات");
+        }
+
+        return JSON.parse(json);
+
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+function safe(value) {
+    if (value === undefined || value === null || value === "") {
+        return "غير مسجل";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function item(label, value, full=false) {
+    return `
+        <div class="item ${full ? "full" : ""}">
+            <div class="label">${label}</div>
+            <div class="value">${safe(value)}</div>
+        </div>
+    `;
+}
+
+function showPatient(patient) {
+
+    const content = document.getElementById("content");
+
+    if (!patient) {
+        content.innerHTML = `
+            <div class="alert">
+                <strong>لم يتم العثور على بيانات المريض</strong>
+                <br><br>
+                تأكد من فتح الصفحة عن طريق تصوير QR الصحيح.
+            </div>
+        `;
+        return;
+    }
+
+    content.innerHTML = `
+
+        <div class="card">
+            <h2>👤 البيانات الأساسية</h2>
+
+            <div class="grid">
+                ${item("اسم المريض", patient.name)}
+                ${item("العمر", patient.age)}
+                ${item("الرقم القومي", patient.nationalId)}
+                ${item("فصيلة الدم", patient.bloodType)}
+                ${item("رقم المريض", patient.id)}
+                ${item("رقم هاتف ولي الأمر / القريب", patient.relativePhone)}
+                ${item("العنوان", patient.address, true)}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🏥 البيانات الطبية</h2>
+
+            <div class="grid">
+                ${item("التشخيص", patient.diagnosis, true)}
+                ${item("الحساسية", patient.allergy, true)}
+                ${item("الأدوية", patient.medications, true)}
+                ${item("الأجهزة الطبية", patient.medicalDevices, true)}
+                ${item("المخاطر الطبية", patient.medicalRisks, true)}
+                ${item("طريقة التعامل مع المخاطر", patient.riskManagement, true)}
+                ${item("أدوية سيولة الدم", patient.bloodThinning, true)}
+                ${item("منظم ضربات القلب", patient.pacemaker, true)}
+                ${item("ملاحظات طبية", patient.medicalNotes, true)}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👨‍⚕️ الطبيب</h2>
+
+            <div class="grid">
+                ${item("رقم الطبيب", patient.doctorPhone)}
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="badge">بيانات تم فتحها بواسطة QR</span>
+        </div>
+    `;
+}
+
+showPatient(getPatientData());
+</script>
+
+</body>
+</html>
