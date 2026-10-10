@@ -201,18 +201,34 @@ function showPatient(patient) {
         return;
     }
 
-    // التحقق من وجود رابط روشتة صالح
+    // تجهيز عرض روشتة الطبيب
     let prescriptionHtml = `
         <div class="item full" style="text-align: center;">
-            <div class="value" style="color: #64748b;">لم يتم إرفاق روشتة طبية لهذه الحالة.</div>
+            <div class="value" style="color: #64748b;">لم يتم إرفاق روشتة طبية.</div>
         </div>
     `;
-
     if (patient.prescription && patient.prescription.startsWith("http")) {
         prescriptionHtml = `
             <div class="item full" style="text-align: center;">
                 <a href="${patient.prescription}" target="_blank">
                     <img src="${patient.prescription}" alt="روشتة الطبيب" style="max-width: 100%; max-height: 400px; border-radius: 12px; border: 1px solid #dcecf2; cursor: pointer; object-fit: contain;">
+                </a>
+                <p style="font-size: 12px; color: #075985; margin-top: 10px; font-weight: bold;">اضغط على الصورة لتكبيرها وعرضها بالحجم الكامل</p>
+            </div>
+        `;
+    }
+
+    // تجهيز عرض صورة بطاقة الرقم القومي
+    let nationalIdHtml = `
+        <div class="item full" style="text-align: center;">
+            <div class="value" style="color: #64748b;">لم يتم إرفاق صورة البطاقة.</div>
+        </div>
+    `;
+    if (patient.nationalIdImage && patient.nationalIdImage.startsWith("http")) {
+        nationalIdHtml = `
+            <div class="item full" style="text-align: center;">
+                <a href="${patient.nationalIdImage}" target="_blank">
+                    <img src="${patient.nationalIdImage}" alt="بطاقة الرقم القومي" style="max-width: 100%; max-height: 400px; border-radius: 12px; border: 1px solid #dcecf2; cursor: pointer; object-fit: contain;">
                 </a>
                 <p style="font-size: 12px; color: #075985; margin-top: 10px; font-weight: bold;">اضغط على الصورة لتكبيرها وعرضها بالحجم الكامل</p>
             </div>
@@ -247,16 +263,23 @@ function showPatient(patient) {
         </div>
 
         <div class="card">
-            <h2>📄 روشتة الطبيب / التقارير الطبية المعتمدة</h2>
+            <h2>👨‍⚕️ الطبيب</h2>
             <div class="grid">
-                ${prescriptionHtml}
+                ${item("رقم الطبيب", patient.doctorPhone)}
             </div>
         </div>
 
         <div class="card">
-            <h2>👨‍⚕️ الطبيب</h2>
+            <h2>🪪 صورة بطاقة الرقم القومي</h2>
             <div class="grid">
-                ${item("رقم الطبيب", patient.doctorPhone)}
+                ${nationalIdHtml}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📄 روشتة الطبيب / التقارير الطبية المعتمدة</h2>
+            <div class="grid">
+                ${prescriptionHtml}
             </div>
         </div>
 
